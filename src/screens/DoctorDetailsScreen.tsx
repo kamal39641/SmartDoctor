@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   Modal,
   TextInput,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -14,8 +15,16 @@ import { DoctorContext } from "../context/DoctorContext";
 
 export default function DoctorDetailsScreen() {
   const router = useRouter(); 
+  const isLoggedIn = false; 
   const { doctorName } = useLocalSearchParams();
   const { addPatient } = useContext(DoctorContext);
+  const { isPatientLoggedIn } = useContext(DoctorContext);
+  const { openForm } = useLocalSearchParams();
+  useEffect(() => {
+    if (openForm === "true") {
+      setModalVisible(true);
+    }
+  }, [openForm]);
 
   // 🔥 NEW STATE
   const [modalVisible, setModalVisible] = useState(false);
@@ -40,9 +49,9 @@ export default function DoctorDetailsScreen() {
         <View style={styles.row}>
 
           {/* Doctor Card */}
-          <View style={styles.card}>
+          <View style={styles.doctorCard}>
             <View style={styles.avatar}>
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>R</Text>
+              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 24 }}>A</Text>
             </View>
 
             <View style={{ flex: 1, paddingLeft: 10, justifyContent: "center" }}>
@@ -57,17 +66,25 @@ export default function DoctorDetailsScreen() {
         {/* Schedule */}
         <View style={styles.card}>
           <Text style={styles.section}>Weekly Schedule</Text>
-          <Text>Mon-Fri: 9:00 AM - 5:00 PM</Text>
-          <Text>Saturday: OFF</Text>
-          <Text>Sunday: 10:00 AM - 2:00 PM</Text>
+          <Text>Friday: OFF</Text>
+          <Text>Saturday - Thursday: 10:00 AM - 2:00 PM</Text>
         </View>
 
         {/* 🔥 Book Button */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => setModalVisible(true)}
+          onPress={() => {
+            if (!isLoggedIn) {
+              router.push({
+                pathname: "/PatientLogin",
+                params: { from: "doctorDetails" },
+              });
+            } else {
+              setModalVisible(true);
+            }
+          }}
         >
-          <Text style={{ color: "#fff", textAlign: "center" }}>
+          <Text style={{ color: "#fff", textAlign: "center", fontWeight: "bold", fontSize: 16 }}>
             Book Appointment
           </Text>
         </TouchableOpacity>
@@ -136,14 +153,19 @@ export default function DoctorDetailsScreen() {
                     name,
                     age: Number(age),
                     address,
+                    doctorName: doctorName as string,
                   });
+
+                  // Notification
+                  Alert.alert(
+                    "Appointment Confirmed",
+                    `${doctorName} এর সাথে আপনার অ্যাপয়েন্টমেন্ট রিকোয়েস্ট পাঠানো হয়েছে`
+                  );
 
                   setModalVisible(false);
                   setName("");
                   setAge("");
                   setAddress("");
-
-                  router.push("/Appointment");
                 }}
               >
                 <Text style={{ color: "#fff" }}>Confirm</Text>
@@ -195,11 +217,22 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
+  doctorCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f530",
+    borderRadius: 15,
+    padding: 15,
+    flex: 1,
+    elevation: 5,
+  },
+
   card: {
     backgroundColor: "#fff",
     borderRadius: 15,
     padding: 15,
     marginBottom: 15,
+    elevation: 3,
   },
 
   avatar: {

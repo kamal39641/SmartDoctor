@@ -23,16 +23,8 @@ export default function RoleScreen({ navigation }: any) {
         title="I am a Patient"
         icon="person"
         color="#10B981"
-        onPress={() => navigation.navigate("PatientLogin")}
+        onPress={() => navigation.navigate("PatientHome")}
       />
-
-      {/* Guest */}
-      {/* <RoleCard
-        title="Continue as Guest"
-        icon="eye"
-        color="#C084FC"
-        onPress={() => alert("Guest mode coming soon")}
-      /> */}
 
     </View>
   );

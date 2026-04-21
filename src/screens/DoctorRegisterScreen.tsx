@@ -17,7 +17,7 @@ export default function DoctorRegisterScreen({ navigation }: any) {
 
       <View style={styles.header}>
 
-      {/* 🔙 Back Button */}
+      {/* Back Button */}
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => router.back()}

@@ -5,6 +5,7 @@ export type Patient = {
   name: string;
   age: number;
   address: string;
+  doctorName: string;
 };
 
 export const DoctorContext = createContext<any>(null);
@@ -22,6 +23,7 @@ export const DoctorProvider = ({ children }: any) => {
 
   //  Notification
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(false);
 
   // 🔥 REAL DATA FLOW
   const [pendingPatients, setPendingPatients] = useState<Patient[]>([]);
@@ -57,6 +59,8 @@ export const DoctorProvider = ({ children }: any) => {
 
         addPatient,
         confirmPatient,
+        isPatientLoggedIn,      
+        setIsPatientLoggedIn,
       }}
     >
       {children}

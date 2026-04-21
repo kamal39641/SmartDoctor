@@ -18,8 +18,7 @@ export default function TodayPatientScreen() {
     name: string;
     age: number;
   };
-
-  // ✅ FIXED
+  
   const { confirmedPatients } = useContext(DoctorContext);
 
   return (

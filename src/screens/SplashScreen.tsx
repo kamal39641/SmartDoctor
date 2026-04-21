@@ -10,13 +10,6 @@ export default function SplashScreen({ navigation }: any) {
         source={require("../../assets/smartDoctor-logo.png")}
         style={styles.logo}
       />
-      
-
-      {/* Title */}
-      {/* <Text style={styles.title}>
-        <Text style={{ color: "#1E3A8A" , fontWeight: "bold" }}>Smart</Text>
-        <Text style={{ color: "#0e8e63" , fontWeight: "bold" }}>Doctor</Text>
-      </Text> */}
 
       {/* Subtitle */}
       <Text style={styles.subtitle}>
@@ -46,6 +39,7 @@ const styles = StyleSheet.create({
     width: 250,
     height: 250,
     resizeMode: "contain",
+    // elevation: 10,
   },
   title: {
     fontSize: 28,
@@ -66,7 +60,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 30,
-
+    elevation: 10,
   },
   buttonText: {
     color: "#f9a866",

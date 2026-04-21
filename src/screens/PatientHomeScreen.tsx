@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router"; // 🔥 add
+import { useRouter } from "expo-router"; 
 
 export default function PatientHomeScreen() {
-  const router = useRouter(); // 🔥 add
+  const router = useRouter(); 
 
   return (
     <View style={styles.container}>
@@ -28,9 +28,6 @@ export default function PatientHomeScreen() {
         <Text style={styles.headerTitle}>স্বাগতম</Text>
         <Text style={styles.headerSub}>রোগী ব্যবহারকারী</Text>
 
-        {/* <TouchableOpacity style={styles.arrowBtn}>
-          <Ionicons name="arrow-forward" size={20} color="#fff" />
-        </TouchableOpacity> */}
       </View>
 
       {/* Body */}

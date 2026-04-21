@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+// import { useRouter } from "expo-router";
+import { DoctorContext } from "../context/DoctorContext"; 
+import { useLocalSearchParams, useRouter } from "expo-router";  
 
 export default function PatientLoginScreen({ navigation }: any) {
   const router = useRouter();
+  const { from } = useLocalSearchParams();
+  const { setIsPatientLoggedIn } = useContext(DoctorContext);
   return (
     <View style={styles.container}>
 
@@ -34,11 +38,28 @@ export default function PatientLoginScreen({ navigation }: any) {
           <TextInput placeholder="********" secureTextEntry style={styles.input} />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("PatientHome")}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            if (from === "doctorDetails") {
+              router.replace({
+                pathname: "/DoctorDetails",
+                params: { openForm: "true" },
+              });
+            } else {
+              router.replace("/PatientHome");
+            }
+          }}
+        >
           <Text style={styles.buttonText}>লগইন করুন</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("PatientRegister")}>
+        <TouchableOpacity onPress={() =>
+          router.push({
+            pathname: "/PatientRegister",
+            params: { from }, 
+          })
+        }>
           <Text style={styles.link}>নতুন অ্যাকাউন্ট তৈরি করুন</Text>
         </TouchableOpacity>
 

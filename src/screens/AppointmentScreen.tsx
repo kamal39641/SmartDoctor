@@ -28,7 +28,16 @@ export default function AppointmentScreen() {
     confirmPatient,
     addPatient,
     notificationsEnabled,
+    doctor,
   } = useContext(DoctorContext);
+
+  const myPending = pendingPatients.filter(
+    (p: any) => p.doctorName === doctor.name
+  );
+
+  const myConfirmed = confirmedPatients.filter(
+    (p: any) => p.doctorName === doctor.name
+  );
 
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState("");
@@ -36,6 +45,7 @@ export default function AppointmentScreen() {
 
   return (
     <View style={styles.container}>
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -54,14 +64,14 @@ export default function AppointmentScreen() {
       </View>
 
       <ScrollView style={{ padding: 15 }}>
-        {/* 🔴 Pending */}
+        {/* Pending */}
         <View style={styles.card}>
-          <Text style={styles.section}>🔴 Pending Patient</Text>
+          <Text style={styles.section}> Pending Appointment</Text>
 
           {pendingPatients.length === 0 ? (
-            <Text style={styles.empty}>No pending patients</Text>
+            <Text style={styles.empty}>No pending appointments</Text>
           ) : (
-            pendingPatients.map((p: Patient, index: number) => (
+            myPending.map((p: Patient, index: number) => (
               <View key={p.id} style={styles.item}>
                 <Text style={styles.name}>
                   {index + 1}. {p.name} ({p.age} বছর)
@@ -74,7 +84,7 @@ export default function AppointmentScreen() {
 
                     if (notificationsEnabled) {
                       Alert.alert(
-                        "✅ Confirmed",
+                        "Confirmed",
                         `${p.name} confirmed`
                       );
                     }
@@ -87,14 +97,14 @@ export default function AppointmentScreen() {
           )}
         </View>
 
-        {/* 🟢 Confirmed */}
+        {/* Confirmed */}
         <View style={styles.card}>
-          <Text style={styles.section}>🟢 Confirmed Patient</Text>
+          <Text style={styles.section}> Confirmed Appointment</Text>
 
           {confirmedPatients.length === 0 ? (
-            <Text style={styles.empty}>No confirmed patients</Text>
+            <Text style={styles.empty}>No confirmed appointments</Text>
           ) : (
-            confirmedPatients.map((p: Patient, index: number) => (
+            myConfirmed.map((p: Patient, index: number) => (
               <View key={p.id} style={styles.item}>
                 <Text style={styles.name}>
                   {index + 1}. {p.name} ({p.age} বছর)
@@ -105,7 +115,7 @@ export default function AppointmentScreen() {
         </View>
       </ScrollView>
 
-      {/* 🔥 Modal */}
+      {/* Modal */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalBox}>
@@ -158,7 +168,7 @@ export default function AppointmentScreen() {
 
                   if (notificationsEnabled) {
                     Alert.alert(
-                      "🔔 New Patient",
+                      "New Patient",
                       "নতুন রোগী যুক্ত হয়েছে"
                     );
                   }

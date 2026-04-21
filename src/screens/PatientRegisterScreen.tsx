@@ -8,10 +8,11 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function PatientRegisterScreen({ navigation }: any) {
   const router = useRouter();
+  const { from } = useLocalSearchParams();
 
   return (
     <View style={styles.container}>
@@ -38,13 +39,6 @@ export default function PatientRegisterScreen({ navigation }: any) {
           <Text style={styles.label}>ঠিকানা</Text>
           <TextInput style={styles.input} placeholder="আপনার ঠিকানা" />
 
-          {/* <Text style={styles.label}>মোবাইল নাম্বার *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="+880..."
-            keyboardType="phone-pad"
-          /> */}
-
           <Text style={styles.label}>ইমেইল অথবা ফোন *</Text>
           <TextInput
             style={styles.input}
@@ -58,7 +52,17 @@ export default function PatientRegisterScreen({ navigation }: any) {
           <TextInput style={styles.input} placeholder="********" secureTextEntry />
 
           {/* Button */}
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("PatientHome")}>
+          <TouchableOpacity style={styles.button} onPress={() => {
+            if (from === "doctorDetails") {
+              router.replace({
+                pathname: "/DoctorDetails",
+                params: { openForm: "true" },
+              });
+            } else {
+              router.replace("/PatientHome");
+            }
+          }}
+          >
             <Text style={styles.buttonText}>রেজিস্টার করুন</Text>
           </TouchableOpacity>
 
