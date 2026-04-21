@@ -7,7 +7,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function PatientLoginScreen({ navigation }: any) {
   const router = useRouter();
-  const { from } = useLocalSearchParams();
+  const { from, redirectTo } = useLocalSearchParams();
   const { setIsPatientLoggedIn } = useContext(DoctorContext);
   return (
     <View style={styles.container}>
@@ -41,7 +41,10 @@ export default function PatientLoginScreen({ navigation }: any) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            if (from === "doctorDetails") {
+            setIsPatientLoggedIn(true);
+            if (redirectTo === "PatientDashboard") {
+              router.replace("/PatientDashboard");
+            } else if (from === "doctorDetails") {
               router.replace({
                 pathname: "/DoctorDetails",
                 params: { openForm: "true" },

@@ -28,6 +28,16 @@ export default function PatientHomeScreen() {
         <Text style={styles.headerTitle}>স্বাগতম</Text>
         <Text style={styles.headerSub}>রোগী ব্যবহারকারী</Text>
 
+        <TouchableOpacity
+          style={styles.dashboardButton}
+          onPress={() => router.push({
+            pathname: "/PatientLogin",
+            params: { redirectTo: "PatientDashboard" }
+          } as any)}
+        >
+          <Ionicons name="person" size={24} color="#000" />
+        </TouchableOpacity>
+
       </View>
 
       {/* Body */}
@@ -112,6 +122,15 @@ const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
     left: 15,
+    top: 60,   
+    backgroundColor: "rgba(255,255,255,0.2)",
+    padding: 8,
+    borderRadius: 20,
+},
+
+  dashboardButton: {
+    position: "absolute",
+    right: 15,
     top: 60,   
     backgroundColor: "rgba(255,255,255,0.2)",
     padding: 8,
