@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useMemo } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { DoctorContext, Patient } from "../context/DoctorContext";
 
 export default function PatientDashboardScreen() {
   const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
+  const { todayPatients = [] } = useContext(DoctorContext);
 
   // Mock patient data
   const [patient] = useState({
@@ -32,19 +34,12 @@ export default function PatientDashboardScreen() {
     spec: "কার্ডিওলজিস্ট",
   });
 
-  // Mock queue for today
-  const [queue] = useState([
-    { id: 1, name: "করিম" },
-    { id: 2, name: "রহিম আহমেদ" },
-    { id: 3, name: "সালমা" },
-    { id: 4, name: "জামাল" },
-    { id: 5, name: "সালমা" },
-    { id: 6, name: "জামাল" },
-    { id: 7, name: "করিম" },
-  ]);
-
-  const patientPosition =
-    queue.findIndex((p) => p.name === patient.name) + 1;
+  // Calculate patient position from todayPatients
+  const patientPosition = useMemo(() => {
+    if (todayPatients.length === 0) return 0;
+    const position = todayPatients.findIndex((p: Patient) => p.name === patient.name);
+    return position !== -1 ? position + 1 : 0;
+  }, [todayPatients, patient.name]);
 
   const handleLogout = () => {
     setMenuVisible(false);
@@ -112,7 +107,14 @@ export default function PatientDashboardScreen() {
 
         {/* Current Appointment */}
         <View style={styles.appointmentCard}>
-          <Text style={styles.sectionTitle}>বর্তমান অ্যাপয়েন্টমেন্ট</Text>
+          <View style={styles.appointmentHeader}>
+            <Text style={styles.sectionTitle}>বর্তমান অ্যাপয়েন্টমেন্ট</Text>
+            {patientPosition > 0 && (
+              <View style={styles.positionBadge}>
+                <Text style={styles.positionText}>#{patientPosition}</Text>
+              </View>
+            )}
+          </View>
 
           <View style={styles.appointmentRow}>
             <View style={styles.appointmentIcon}>
@@ -142,48 +144,7 @@ export default function PatientDashboardScreen() {
           </View>
         </View>
 
-        {/* Today's Queue */}
-        <View style={styles.queueCard}>
-          <View style={styles.queueHeader}>
-            <Text style={styles.sectionTitle}>আজকের রোগী লিস্ট</Text>
-            <View style={styles.positionBadge}>
-              <Text style={styles.positionText}>#{patientPosition}</Text>
-            </View>
-          </View>
 
-          <View style={styles.queueList}>
-            {queue.map((q, index) => (
-              <View key={q.id} style={styles.queueItemRow}>
-                <View
-                  style={[
-                    styles.queueNumber,
-                    q.name === patient.name && styles.currentQueue,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.queueNumberText,
-                      q.name === patient.name && styles.currentQueueText,
-                    ]}
-                  >
-                    {index + 1}
-                  </Text>
-                </View>
-                <Text
-                  style={[
-                    styles.queueName,
-                    q.name === patient.name && styles.currentQueueName,
-                  ]}
-                >
-                  {q.name}
-                </Text>
-                {q.name === patient.name && (
-                  <Ionicons name="checkmark-circle" size={24} color="#05a46f" />
-                )}
-              </View>
-            ))}
-          </View>
-        </View>
 
       </ScrollView>
 
@@ -326,15 +287,22 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
+  appointmentHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 15,
     backgroundColor: "#f17d2a",
     padding: 10,
     borderRadius: 10,
     textAlign: "center",
+    flex: 1,
   },
 
   appointmentRow: {
@@ -413,6 +381,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffc0cb",
     borderRadius: 10,
     padding: 12,
+  },
+
+  emptyQueue: {
+    backgroundColor: "#ffc0cb",
+    borderRadius: 10,
+    padding: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 120,
+  },
+
+  emptyQueueText: {
+    color: "#999",
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: "center",
   },
 
   queueItemRow: {

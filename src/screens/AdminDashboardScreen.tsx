@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { AdminContext } from "../context/AdminContext";
+import { AdminContext, PendingDoctor, Hospital, VerificationItem, Appointment } from "../context/AdminContext";
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
@@ -22,9 +22,9 @@ export default function AdminDashboardScreen() {
   } = useContext(AdminContext);
 
   // Count pending items
-  const pendingDoctorCount = pendingDoctors.filter(d => d.status === "pending").length;
-  const pendingHospitalCount = pendingHospitals.filter(h => h.status === "pending").length;
-  const pendingVerificationCount = verifications.filter(v => v.status === "pending").length;
+  const pendingDoctorCount = pendingDoctors.filter((d: PendingDoctor) => d.status === "pending").length;
+  const pendingHospitalCount = pendingHospitals.filter((h: Hospital) => h.status === "pending").length;
+  const pendingVerificationCount = verifications.filter((v: VerificationItem) => v.status === "pending").length;
   const totalAppointments = appointments.length;
   const blockedUsersCount = blockedUsers.length;
 
@@ -133,13 +133,13 @@ export default function AdminDashboardScreen() {
             </View>
             <View style={styles.miniStat}>
               <Text style={styles.miniStatNumber}>
-                {pendingDoctors.filter(d => d.bmdcVerified).length}
+                {pendingDoctors.filter((d: PendingDoctor) => d.bmdcVerified).length}
               </Text>
               <Text style={styles.miniStatLabel}>যাচাইকৃত</Text>
             </View>
             <View style={styles.miniStat}>
               <Text style={styles.miniStatNumber}>
-                {appointments.filter(a => a.status === "completed").length}
+                {appointments.filter((a: Appointment) => a.status === "completed").length}
               </Text>
               <Text style={styles.miniStatLabel}>সম্পন্ন</Text>
             </View>

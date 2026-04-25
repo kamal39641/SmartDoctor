@@ -9,6 +9,7 @@ import DoctorRegisterScreen from "../src/screens/DoctorRegisterScreen";
 import PatientRegisterScreen from "../src/screens/PatientRegisterScreen";
 import PatientHomeScreen from "../src/screens/PatientHomeScreen";
 import DoctorSearchScreen from "../src/screens/DoctorSearchScreen";
+import AdminDashboardScreen from "../src/screens/AdminDashboardScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ export default function App() {
         <Stack.Screen name="PatientRegister" component={PatientRegisterScreen} />
         <Stack.Screen name="PatientHome" component={PatientHomeScreen} />
         <Stack.Screen name="DoctorSearch" component={DoctorSearchScreen} />
+        <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
       </Stack.Navigator>
   );
 }

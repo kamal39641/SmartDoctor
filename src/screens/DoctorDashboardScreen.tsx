@@ -18,12 +18,16 @@ export default function DoctorDashboardScreen() {
 
   const {
     doctor,
-    confirmedPatients,
     pendingPatients,
-    setPendingPatients,
+    todayPatients,
+    markPatientDone,
   } = useContext(DoctorContext);
 
-  const todayPatients = confirmedPatients.length;
+  const myTodayPatients = todayPatients.filter(
+    (p: any) => p.doctorName === doctor.name
+  );
+
+  const todayCount = myTodayPatients.length;
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -35,11 +39,9 @@ export default function DoctorDashboardScreen() {
 
   const [isActive, setIsActive] = useState(true);
 
-  // remove patient
+  // remove patient from today's list
   const handleDone = (id: number) => {
-    setPendingPatients((prev: any[]) =>
-      prev.filter((p) => p.id !== id)
-    );
+    markPatientDone(id);
   };
 
   return (
@@ -124,7 +126,7 @@ export default function DoctorDashboardScreen() {
             onPress={() => router.push("/TodayPatient")}
           >
             <Text style={styles.statLabel}>আজকের রোগী</Text>
-            <Text style={styles.statNumber}>{todayPatients} জন</Text>
+            <Text style={styles.statNumber}>{todayCount} জন</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -143,12 +145,12 @@ export default function DoctorDashboardScreen() {
             <Text style={styles.sectionTitlePending}>⏳পেন্ডিং পেশেন্ট</Text>
           </View>
 
-          {pendingPatients.length === 0 ? (
+          {todayCount === 0 ? (
             <Text style={{ textAlign: "center", marginTop: 10 }}>
               আজ কোনো পেশেন্ট নেই
             </Text>
           ) : (
-            pendingPatients.map((p: any, index: number) => (
+            myTodayPatients.map((p: any, index: number) => (
               <View key={p.id} style={styles.patientCard}>
                 <Text style={styles.serial}>
                   {index + 1}. {p.name} ({p.age})
@@ -156,7 +158,7 @@ export default function DoctorDashboardScreen() {
 
                 <TouchableOpacity
                   style={styles.doneBtn}
-                  onPress={() => handleDone(p.id)}
+                  onPress={() => markPatientDone(p.id)}
                 >
                   <Text style={{ color: "#fff" }}>দেখা হয়েছে</Text>
                 </TouchableOpacity>

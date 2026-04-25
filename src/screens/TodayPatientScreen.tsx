@@ -8,18 +8,14 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { DoctorContext } from "../context/DoctorContext";
+import { DoctorContext, Patient } from "../context/DoctorContext";
 
 export default function TodayPatientScreen() {
   const router = useRouter();
-
-  type Patient = {
-    id: number;
-    name: string;
-    age: number;
-  };
-  
-  const { confirmedPatients } = useContext(DoctorContext);
+  const { doctor, todayPatients, markPatientDone } = useContext(DoctorContext);
+  const myTodayPatients = todayPatients.filter(
+    (p: any) => p.doctorName === doctor.name
+  );
 
   return (
     <View style={styles.container}>
@@ -39,17 +35,26 @@ export default function TodayPatientScreen() {
         <View style={styles.card}>
 
           <Text style={styles.titlecard}>
-            আজকের রোগী: {confirmedPatients.length} জন
+            আজকের রোগী: {myTodayPatients.length} জন
           </Text>
 
-          {confirmedPatients.length === 0 ? (
+          {myTodayPatients.length === 0 ? (
             <Text style={styles.empty}>আজ কোনো রোগী নেই</Text>
           ) : (
-            confirmedPatients.map((p: Patient, index: number) => (
+            myTodayPatients.map((p: Patient, index: number) => (
               <View key={p.id} style={styles.item}>
-                <Text style={styles.name}>
-                  {index + 1}. {p.name} ({p.age} বছর)
-                </Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.name}>
+                    {index + 1}. {p.name} ({p.age} বছর)
+                  </Text>
+                  {p.phone && <Text style={styles.phone}>📞 {p.phone}</Text>}
+                </View>
+                <TouchableOpacity
+                  style={styles.doneBtn}
+                  onPress={() => markPatientDone(p.id)}
+                >
+                  <Ionicons name="checkmark-circle" size={24} color="#05a46f" />
+                </TouchableOpacity>
               </View>
             ))
           )}
@@ -112,7 +117,20 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
     elevation: 3,
-    textAlign: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  phone: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 5,
+  },
+
+  doneBtn: {
+    padding: 8,
+    marginLeft: 10,
   },
 
   empty: {

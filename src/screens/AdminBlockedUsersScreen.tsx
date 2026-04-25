@@ -120,7 +120,7 @@ export default function AdminBlockedUsersScreen() {
         style={styles.unblockBtn}
         onPress={() => handleUnblock(item.id)}
       >
-        <Ionicons name="unlock" size={18} color="#fff" />
+        <Ionicons name="lock-open" size={18} color="#fff" />
         <Text style={styles.unblockBtnText}>আনব্লক করুন</Text>
       </TouchableOpacity>
     </View>

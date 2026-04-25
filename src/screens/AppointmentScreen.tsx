@@ -11,13 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { DoctorContext } from "../context/DoctorContext";
-
-type Patient = {
-  id: number;
-  name: string;
-  age: number;
-};
+import { DoctorContext, Patient } from "../context/DoctorContext";
 
 export default function AppointmentScreen() {
   const router = useRouter();
@@ -27,21 +21,23 @@ export default function AppointmentScreen() {
     confirmedPatients,
     confirmPatient,
     addPatient,
+    moveConfirmedToToday,
     notificationsEnabled,
     doctor,
   } = useContext(DoctorContext);
 
   const myPending = pendingPatients.filter(
-    (p: any) => p.doctorName === doctor.name
+    (p: Patient) => p.doctorName === doctor.name
   );
 
   const myConfirmed = confirmedPatients.filter(
-    (p: any) => p.doctorName === doctor.name
+    (p: Patient) => p.doctorName === doctor.name
   );
 
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
+  const [phone, setPhone] = useState("");
 
   return (
     <View style={styles.container}>
@@ -68,7 +64,7 @@ export default function AppointmentScreen() {
         <View style={styles.card}>
           <Text style={styles.section}> Pending Appointment</Text>
 
-          {pendingPatients.length === 0 ? (
+          {myPending.length === 0 ? (
             <Text style={styles.empty}>No pending appointments</Text>
           ) : (
             myPending.map((p: Patient, index: number) => (
@@ -84,8 +80,8 @@ export default function AppointmentScreen() {
 
                     if (notificationsEnabled) {
                       Alert.alert(
-                        "Confirmed",
-                        `${p.name} confirmed`
+                        "✅ Confirmed",
+                        `${p.name} কে SMS পাঠানো হয়েছে`
                       );
                     }
                   }}
@@ -101,16 +97,38 @@ export default function AppointmentScreen() {
         <View style={styles.card}>
           <Text style={styles.section}> Confirmed Appointment</Text>
 
-          {confirmedPatients.length === 0 ? (
+          {myConfirmed.length === 0 ? (
             <Text style={styles.empty}>No confirmed appointments</Text>
           ) : (
-            myConfirmed.map((p: Patient, index: number) => (
-              <View key={p.id} style={styles.item}>
-                <Text style={styles.name}>
-                  {index + 1}. {p.name} ({p.age} বছর)
-                </Text>
-              </View>
-            ))
+            <>
+              {myConfirmed.map((p: Patient, index: number) => (
+                <View key={p.id} style={styles.item}>
+                  <Text style={styles.name}>
+                    {index + 1}. {p.name} ({p.age} বছর)
+                  </Text>
+                </View>
+              ))}
+              {myConfirmed.length > 0 && (
+                <TouchableOpacity
+                  style={styles.moveBtn}
+                  onPress={() => {
+                    moveConfirmedToToday(myConfirmed);
+
+                    if (notificationsEnabled) {
+                      Alert.alert(
+                        "Success",
+                        `${myConfirmed.length} রোগী আজকের লিস্টে যোগ হয়েছে`
+                      );
+                    }
+                  }}
+                >
+                  <Ionicons name="checkmark-done" size={20} color="#fff" />
+                  <Text style={{ color: "#fff", marginLeft: 8, fontWeight: "bold" }}>
+                    আজকের রোগী তৈরি করুন
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </>
           )}
         </View>
       </ScrollView>
@@ -135,7 +153,13 @@ export default function AppointmentScreen() {
               keyboardType="numeric"
               style={styles.input}
             />
-
+            <TextInput
+              placeholder="ফোন নম্বর"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              style={styles.input}
+            />
             <View style={styles.modalBtnRow}>
               {/* Cancel */}
               <TouchableOpacity
@@ -144,6 +168,7 @@ export default function AppointmentScreen() {
                   setModalVisible(false);
                   setName("");
                   setAge("");
+                  setPhone("");
                 }}
               >
                 <Text style={{ color: "#fff" }}>Cancel</Text>
@@ -153,7 +178,7 @@ export default function AppointmentScreen() {
               <TouchableOpacity
                 style={styles.addBtn}
                 onPress={() => {
-                  if (!name || !age) {
+                  if (!name || !age || !phone) {
                     Alert.alert("⚠️ Error", "সব তথ্য দিন");
                     return;
                   }
@@ -162,6 +187,9 @@ export default function AppointmentScreen() {
                     id: Date.now(),
                     name,
                     age: Number(age),
+                    phone,
+                    address: "",
+                    doctorName: doctor.name,
                   };
 
                   addPatient(newPatient);
@@ -169,12 +197,13 @@ export default function AppointmentScreen() {
                   if (notificationsEnabled) {
                     Alert.alert(
                       "New Patient",
-                      "নতুন রোগী যুক্ত হয়েছে"
+                      `${name} কে যুক্ত করা হয়েছে`
                     );
                   }
 
                   setName("");
                   setAge("");
+                  setPhone("");
                   setModalVisible(false);
                 }}
               >
@@ -306,5 +335,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#10B981",
     padding: 10,
     borderRadius: 10,
+  },
+
+  moveBtn: {
+    backgroundColor: "#0ea5e9",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 12,
   },
 });

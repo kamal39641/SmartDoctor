@@ -26,6 +26,14 @@ export default function RoleScreen({ navigation }: any) {
         onPress={() => navigation.navigate("PatientHome")}
       />
 
+      {/* Admin */}
+      <RoleCard
+        title="I am an Admin"
+        icon="shield-checkmark"
+        color="#DC2626"
+        onPress={() => navigation.navigate("AdminDashboard")}
+      />
+
     </View>
   );
 }

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { AdminContext } from "../context/AdminContext";
+import { AdminContext, Appointment } from "../context/AdminContext";
 
 export default function AdminAppointmentMonitoringScreen() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export default function AdminAppointmentMonitoringScreen() {
   const filteredAppointments = 
     filterStatus === "all" 
       ? appointments 
-      : appointments.filter((a) => a.status === filterStatus);
+      : appointments.filter((a: Appointment) => a.status === filterStatus);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -153,7 +153,7 @@ export default function AdminAppointmentMonitoringScreen() {
               filterStatus === "scheduled" && styles.filterTabTextActive,
             ]}
           >
-            নির্ধারিত ({appointments.filter((a) => a.status === "scheduled").length})
+            নির্ধারিত ({appointments.filter((a: Appointment) => a.status === "scheduled").length})
           </Text>
         </Pressable>
 
@@ -167,7 +167,7 @@ export default function AdminAppointmentMonitoringScreen() {
               filterStatus === "completed" && styles.filterTabTextActive,
             ]}
           >
-            সম্পন্ন ({appointments.filter((a) => a.status === "completed").length})
+            সম্পন্ন ({appointments.filter((a: Appointment) => a.status === "completed").length})
           </Text>
         </Pressable>
       </View>

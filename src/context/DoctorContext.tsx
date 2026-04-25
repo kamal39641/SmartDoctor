@@ -6,6 +6,7 @@ export type Patient = {
   age: number;
   address: string;
   doctorName: string;
+  phone?: string;
 };
 
 export const DoctorContext = createContext<any>(null);
@@ -35,14 +36,32 @@ export const DoctorProvider = ({ children }: any) => {
     setPendingPatients((prev: Patient[]) => [...prev, patient]);
   };
 
-  // 🔥 Confirm Appointment
+  // 🔥 Confirm Appointment (move from pending to confirmed)
   const confirmPatient = (patient: Patient) => {
     setPendingPatients((prev: Patient[]) =>
       prev.filter((p) => p.id !== patient.id)
     );
 
     setConfirmedPatients((prev: Patient[]) => [...prev, patient]);
-    setTodayPatients((prev: Patient[]) => [...prev, patient]);
+  };
+
+  // 🔥 Move confirmed patients to today's list (Doctor clicks button)
+  const moveConfirmedToToday = (patients: Patient[]) => {
+    setConfirmedPatients((prev: Patient[]) =>
+      prev.filter((p) => !patients.some((m) => m.id === p.id))
+    );
+
+    setTodayPatients((prev: Patient[]) => [
+      ...prev,
+      ...patients.filter((p) => !prev.some((t) => t.id === p.id)),
+    ]);
+  };
+
+  // 🔥 Mark patient as done (remove from today's list)
+  const markPatientDone = (patientId: number) => {
+    setTodayPatients((prev: Patient[]) =>
+      prev.filter((p) => p.id !== patientId)
+    );
   };
 
   return (
@@ -59,6 +78,8 @@ export const DoctorProvider = ({ children }: any) => {
 
         addPatient,
         confirmPatient,
+        moveConfirmedToToday,
+        markPatientDone,
         isPatientLoggedIn,      
         setIsPatientLoggedIn,
       }}

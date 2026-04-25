@@ -9,13 +9,13 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { AdminContext } from "../context/AdminContext";
+import { AdminContext, VerificationItem } from "../context/AdminContext";
 
 export default function AdminVerificationScreen() {
   const router = useRouter();
   const { verifications, verifyUser, rejectVerification } = useContext(AdminContext);
 
-  const pendingVerifications = verifications.filter((v) => v.status === "pending");
+  const pendingVerifications = verifications.filter((v: VerificationItem) => v.status === "pending");
 
   const handleVerify = (verificationId: number) => {
     Alert.alert(
@@ -227,10 +227,10 @@ export default function AdminVerificationScreen() {
       )}
 
       {/* Verified Tab */}
-      {verifications.filter((v) => v.status === "verified").length > 0 && (
+      {verifications.filter((v: VerificationItem) => v.status === "verified").length > 0 && (
         <View style={styles.verifiedSection}>
           <Text style={styles.verifiedTitle}>
-            যাচাইকৃত: {verifications.filter((v) => v.status === "verified").length}
+            যাচাইকৃত: {verifications.filter((v: VerificationItem) => v.status === "verified").length}
           </Text>
         </View>
       )}
