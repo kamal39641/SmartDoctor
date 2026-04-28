@@ -1,4 +1,4 @@
-import React, { useState, useContext, useMemo } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -7,39 +7,45 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { DoctorContext, Patient } from "../context/DoctorContext";
+import { DoctorContext } from "../context/DoctorContext";
 
 export default function PatientDashboardScreen() {
   const router = useRouter();
-  const [menuVisible, setMenuVisible] = useState(false);
-  const { todayPatients = [] } = useContext(DoctorContext);
 
-  // Mock patient data
-  const [patient] = useState({
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const { getPatientPosition, patientsAhead, currentPatient } =
+    useContext(DoctorContext);
+
+  /*
+Logged patient info from booking
+*/
+  const patient = currentPatient || {
+    id: 0,
     name: "রহিম আহমেদ",
     age: 35,
     address: "ঢাকা, বাংলাদেশ",
     phone: "01712345678",
     email: "rahim@email.com",
-  });
+  };
 
-  // Mock current appointment
-  const [currentAppointment] = useState({
+  const currentAppointment = {
     doctor: "ডা. আহমেদ রহমান",
     hospital: "Square Hospital",
     time: "10:00 AM",
     date: "22-04-2026",
     spec: "কার্ডিওলজিস্ট",
-  });
+  };
 
-  // Calculate patient position from todayPatients
-  const patientPosition = useMemo(() => {
-    if (todayPatients.length === 0) return 0;
-    const position = todayPatients.findIndex((p: Patient) => p.name === patient.name);
-    return position !== -1 ? position + 1 : 0;
-  }, [todayPatients, patient.name]);
+  /*
+LIVE queue position
+*/
+  const patientPosition = patient?.id ? getPatientPosition(patient.id) : null;
+
+  const aheadPatients = patient?.id ? patientsAhead(patient.id) : 0;
 
   const handleLogout = () => {
     setMenuVisible(false);
@@ -69,6 +75,7 @@ export default function PatientDashboardScreen() {
 
         <View>
           <Text style={styles.headerTitle}>রোগী ড্যাশবোর্ড</Text>
+
           <Text style={styles.headerSub}>স্বাগতম, {patient.name}</Text>
         </View>
 
@@ -80,57 +87,74 @@ export default function PatientDashboardScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={{ padding: 15, marginBottom: 15 }} showsVerticalScrollIndicator={false}>
-        {/* Patient Card */}
+      <ScrollView
+        style={{
+          padding: 15,
+          marginBottom: 15,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Profile */}
         <View style={styles.patientCard}>
           <View style={styles.row}>
             <View style={styles.defaultImg}>
               <Ionicons name="person" size={35} color="#fff" />
             </View>
 
-            <View style={{ flex: 1, marginLeft: 15 }}>
+            <View
+              style={{
+                flex: 1,
+                marginLeft: 15,
+              }}
+            >
               <Text style={styles.name}>{patient.name}</Text>
+
               <Text style={styles.info}>বয়স: {patient.age}</Text>
+
               <Text style={styles.info}>📞 {patient.phone}</Text>
             </View>
           </View>
 
           <View style={styles.divider} />
 
-          <View>
-            <Text style={styles.label}>ঠিকানা:</Text>
-            <Text style={styles.value}>{patient.address}</Text>
-            <Text style={[styles.label, { marginTop: 10 }]}>ইমেইল:</Text>
-            <Text style={styles.value}>{patient.email}</Text>
-          </View>
+          <Text style={styles.label}>ঠিকানা:</Text>
+
+          <Text style={styles.value}>{patient.address}</Text>
         </View>
 
-        {/* Current Appointment */}
+        {/* Appointment */}
         <View style={styles.appointmentCard}>
-          <View style={styles.appointmentHeader}>
-            <Text style={styles.sectionTitle}>বর্তমান অ্যাপয়েন্টমেন্ট</Text>
-            <View style={styles.queueCard}>
-              <Text style={styles.queueTitle}>
-                আপনার বর্তমান অবস্থান
-              </Text>
+          <Text style={styles.sectionTitle}>বর্তমান অ্যাপয়েন্টমেন্ট</Text>
 
-              <Text style={styles.bigSerial}>
-                {patientPosition ?? "-"}
-              </Text>
+          {/* LIVE Queue */}
+          <View style={styles.queueCard}>
+            <Text style={styles.queueTitle}>আপনার বর্তমান সিরিয়াল</Text>
 
-              <Text>
-              সামনে রোগী বাকি:
-              {patientPosition ? patientPosition-1 : 0}
-              </Text>
-              </View>
+            <Text style={styles.bigSerial}>
+              {patientPosition ? patientPosition : "-"}
+            </Text>
+
+            {patientPosition ? (
+              <>
+                <Text style={styles.queueInfo}>
+                  সামনে রোগী বাকি: {aheadPatients} জন
+                </Text>
+
+                <Text style={styles.liveBadge}>🟢 Live Queue Updated</Text>
+              </>
+            ) : (
+              <Text style={styles.notJoined}>এখনও queue তে যোগ হয়নি</Text>
+            )}
           </View>
 
           <View style={styles.appointmentRow}>
             <View style={styles.appointmentIcon}>
               <Ionicons name="person-circle" size={30} color="#0ea5e9" />
             </View>
+
             <View style={{ flex: 1 }}>
               <Text style={styles.doctorName}>{currentAppointment.doctor}</Text>
+
               <Text style={styles.specialty}>{currentAppointment.spec}</Text>
             </View>
           </View>
@@ -138,26 +162,28 @@ export default function PatientDashboardScreen() {
           <View style={styles.appointmentDetails}>
             <View style={styles.detailRow}>
               <Ionicons name="business" size={18} color="#666" />
-              <Text style={styles.detailText}>{currentAppointment.hospital}</Text>
+
+              <Text style={styles.detailText}>
+                {currentAppointment.hospital}
+              </Text>
             </View>
 
             <View style={styles.detailRow}>
               <Ionicons name="calendar" size={18} color="#666" />
+
               <Text style={styles.detailText}>{currentAppointment.date}</Text>
             </View>
 
             <View style={styles.detailRow}>
               <Ionicons name="time" size={18} color="#666" />
+
               <Text style={styles.detailText}>{currentAppointment.time}</Text>
             </View>
           </View>
         </View>
-
-
-
       </ScrollView>
 
-      {/* Settings Menu Modal */}
+      {/* Menu */}
       <Modal visible={menuVisible} transparent animationType="fade">
         <TouchableOpacity
           style={styles.modalOverlay}
@@ -169,6 +195,7 @@ export default function PatientDashboardScreen() {
               onPress={handleEditProfile}
             >
               <Ionicons name="create-outline" size={20} color="#0ea5e9" />
+
               <Text style={styles.menuText}>প্রোফাইল সম্পাদনা</Text>
             </TouchableOpacity>
 
@@ -177,6 +204,7 @@ export default function PatientDashboardScreen() {
               onPress={handlePreviousVisits}
             >
               <Ionicons name="list-outline" size={20} color="#0ea5e9" />
+
               <Text style={styles.menuText}>আগের ভিজিট</Text>
             </TouchableOpacity>
 
@@ -185,9 +213,8 @@ export default function PatientDashboardScreen() {
               onPress={handleLogout}
             >
               <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-              <Text style={[styles.menuText, { color: "#EF4444" }]}>
-                লগআউট
-              </Text>
+
+              <Text style={[styles.menuText, { color: "#EF4444" }]}>লগআউট</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -230,9 +257,9 @@ const styles = StyleSheet.create({
   },
 
   headerSub: {
-    color: "rgba(255,255,255,0.9)",
+    color: "#fff",
     fontSize: 14,
-    marginTop: 3,
+    marginTop: 4,
     textAlign: "center",
   },
 
@@ -261,13 +288,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
   },
 
   info: {
-    fontSize: 13,
-    color: "#666",
     marginTop: 3,
+    color: "#666",
   },
 
   divider: {
@@ -277,14 +302,11 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 14,
     fontWeight: "600",
     color: "#666",
   },
 
   value: {
-    fontSize: 15,
-    color: "#333",
     marginTop: 3,
   },
 
@@ -296,31 +318,62 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  appointmentHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
     backgroundColor: "#f17d2a",
     padding: 10,
     borderRadius: 10,
     textAlign: "center",
-    flex: 1,
+  },
+
+  queueCard: {
+    backgroundColor: "#eefcf6",
+    marginTop: 18,
+    padding: 20,
+    borderRadius: 20,
+    alignItems: "center",
+    elevation: 4,
+  },
+
+  queueTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+
+  bigSerial: {
+    fontSize: 56,
+    fontWeight: "bold",
+    marginVertical: 8,
+    color: "#10B981",
+  },
+
+  queueInfo: {
+    fontWeight: "600",
+    fontSize: 15,
+  },
+
+  liveBadge: {
+    marginTop: 10,
+    backgroundColor: "#10B981",
+    paddingHorizontal: 15,
+    paddingVertical: 6,
+    borderRadius: 15,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  notJoined: {
+    marginTop: 12,
+    color: "red",
+    fontWeight: "bold",
   },
 
   appointmentRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 15,
-    // backgroundColor: "#b5dfa3",
-    // padding: 15,
-    // borderRadius: 10,
+    marginTop: 20,
+    marginBottom: 10,
   },
 
   appointmentIcon: {
@@ -328,23 +381,18 @@ const styles = StyleSheet.create({
   },
 
   doctorName: {
-    fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
+    fontSize: 16,
   },
 
   specialty: {
-    fontSize: 13,
+    marginTop: 4,
     color: "#666",
-    marginTop: 3,
   },
 
   appointmentDetails: {
-    // backgroundColor: "#f8f9fa",
-    borderRadius: 10,
     padding: 12,
     gap: 10,
-    marginTop: -10,
   },
 
   detailRow: {
@@ -355,188 +403,6 @@ const styles = StyleSheet.create({
 
   detailText: {
     fontSize: 13,
-    color: "#333",
-  },
-
-  queueCard: {
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 20,
-    elevation: 3,
-  },
-
-  queueHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-
-//   queueCard:{
-// backgroundColor:"white",
-// margin:15,
-// padding:20,
-// borderRadius:20,
-// alignItems:"center",
-// elevation:4
-// },
-
-queueTitle:{
-fontSize:18,
-fontWeight:"bold"
-},
-
-bigSerial:{
-fontSize:42,
-fontWeight:"bold",
-marginVertical:10,
-color:"#10B981"
-},
-
-  positionBadge: {
-    backgroundColor: "#05a46f",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-
-  positionText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-
-  queueList: {
-    backgroundColor: "#ffc0cb",
-    borderRadius: 10,
-    padding: 12,
-  },
-
-  emptyQueue: {
-    backgroundColor: "#ffc0cb",
-    borderRadius: 10,
-    padding: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: 120,
-  },
-
-  emptyQueueText: {
-    color: "#999",
-    fontSize: 16,
-    marginTop: 10,
-    textAlign: "center",
-  },
-
-  queueItemRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-
-  queueNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#e0e0e0",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-
-  currentQueue: {
-    backgroundColor: "#05a46f",
-  },
-
-  queueNumberText: {
-    fontWeight: "bold",
-    color: "#666",
-  },
-
-  currentQueueText: {
-    color: "#fff",
-  },
-
-  queueName: {
-    flex: 1,
-    fontSize: 14,
-    color: "#333",
-  },
-
-  currentQueueName: {
-    fontWeight: "bold",
-    color: "#05a46f",
-  },
-
-  historyCard: {
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 20,
-    elevation: 3,
-  },
-
-  historyHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  historyItem: {
-    flexDirection: "row",
-    marginTop: 15,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-
-  historyLeft: {
-    flex: 0.35,
-  },
-
-  historyRight: {
-    flex: 0.65,
-  },
-
-  historyDate: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#0ea5e9",
-  },
-
-  historyDoctor: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#333",
-    marginTop: 3,
-  },
-
-  historySpec: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 2,
-  },
-
-  patientNameSmall: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#333",
-  },
-
-  diagnosis: {
-    fontSize: 12,
-    color: "#05a46f",
-    marginTop: 3,
-    fontWeight: "500",
-  },
-
-  hospital: {
-    fontSize: 11,
-    color: "#666",
-    marginTop: 2,
   },
 
   modalOverlay: {
@@ -568,7 +434,6 @@ color:"#10B981"
   menuText: {
     marginLeft: 15,
     fontSize: 16,
-    color: "#333",
     fontWeight: "500",
   },
 });

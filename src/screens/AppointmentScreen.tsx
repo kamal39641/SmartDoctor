@@ -9,8 +9,10 @@ import {
   TextInput,
   Modal,
 } from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+
 import { DoctorContext, Patient } from "../context/DoctorContext";
 
 export default function AppointmentScreen() {
@@ -27,21 +29,39 @@ export default function AppointmentScreen() {
   } = useContext(DoctorContext);
 
   const myPending = pendingPatients.filter(
-    (p: Patient) => p.doctorName === doctor.name
+    (p: Patient) => p.doctorName === doctor.name,
   );
 
   const myConfirmed = confirmedPatients.filter(
-    (p: Patient) => p.doctorName === doctor.name
+    (p: Patient) => p.doctorName === doctor.name,
   );
 
   const [modalVisible, setModalVisible] = useState(false);
+
   const [name, setName] = useState("");
+
   const [age, setAge] = useState("");
+
   const [phone, setPhone] = useState("");
+
+  const sendTodayPatients = () => {
+    if (myConfirmed.length === 0) {
+      Alert.alert("Info", "কোন confirmed patient নেই");
+      return;
+    }
+
+    moveConfirmedToToday();
+
+    if (notificationsEnabled) {
+      Alert.alert(
+        "Success",
+        `${myConfirmed.length} জন রোগী আজকের রোগীতে পাঠানো হয়েছে`,
+      );
+    }
+  };
 
   return (
     <View style={styles.container}>
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -50,10 +70,9 @@ export default function AppointmentScreen() {
 
         <Text style={styles.title}>অ্যাপয়েন্টমেন্ট</Text>
 
-        {/* Add Button */}
         <TouchableOpacity
-          onPress={() => setModalVisible(true)}
           style={styles.addBtnPlus}
+          onPress={() => setModalVisible(true)}
         >
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
@@ -62,7 +81,7 @@ export default function AppointmentScreen() {
       <ScrollView style={{ padding: 15 }}>
         {/* Pending */}
         <View style={styles.card}>
-          <Text style={styles.section}> Pending Appointment</Text>
+          <Text style={styles.section}>Pending Appointment</Text>
 
           {myPending.length === 0 ? (
             <Text style={styles.empty}>No pending appointments</Text>
@@ -79,10 +98,7 @@ export default function AppointmentScreen() {
                     confirmPatient(p);
 
                     if (notificationsEnabled) {
-                      Alert.alert(
-                        "✅ Confirmed",
-                        `${p.name} কে SMS পাঠানো হয়েছে`
-                      );
+                      Alert.alert("Confirmed", `${p.name} confirmed`);
                     }
                   }}
                 >
@@ -95,7 +111,7 @@ export default function AppointmentScreen() {
 
         {/* Confirmed */}
         <View style={styles.card}>
-          <Text style={styles.section}> Confirmed Appointment</Text>
+          <Text style={styles.section}>Confirmed Appointment</Text>
 
           {myConfirmed.length === 0 ? (
             <Text style={styles.empty}>No confirmed appointments</Text>
@@ -108,42 +124,29 @@ export default function AppointmentScreen() {
                   </Text>
                 </View>
               ))}
-              {/* {myConfirmed.length > 0 && (
-                <TouchableOpacity
-                  style={styles.moveBtn}
-                  onPress={() => {
-                    moveConfirmedToToday(myConfirmed);
 
-                    if (notificationsEnabled) {
-                      Alert.alert(
-                        "Success",
-                        `${myConfirmed.length} রোগী আজকের লিস্টে যোগ হয়েছে`
-                      );
-                    }
+              <TouchableOpacity
+                style={styles.nowConfirmBtn}
+                onPress={sendTodayPatients}
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    paddingVertical: 6,
+                    fontSize: 16,
                   }}
                 >
-                  <Ionicons name="checkmark-done" size={20} color="#fff" />
-                  <Text style={{ color: "#fff", marginLeft: 8, fontWeight: "bold" }}>
-                    আজকের রোগী তৈরি করুন
-                  </Text>
-                </TouchableOpacity>
-              )} */}
+                  আজকের রোগীতে পাঠান
+                </Text>
+              </TouchableOpacity>
             </>
           )}
-
-          <TouchableOpacity
-            style={styles.nowConfirmBtn}
-            onPress={moveConfirmedToToday}
-            >
-            <Text style={{color:"#fff", fontWeight:"bold", textAlign:"center", paddingVertical: 6, fontSize: 16, }}>
-              আজকের রোগীতে পাঠান
-            </Text>
-          </TouchableOpacity>
-
         </View>
       </ScrollView>
 
-      {/* Modal */}
+      {/* Add Patient Modal */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalBox}>
@@ -163,6 +166,7 @@ export default function AppointmentScreen() {
               keyboardType="numeric"
               style={styles.input}
             />
+
             <TextInput
               placeholder="ফোন নম্বর"
               value={phone}
@@ -170,8 +174,8 @@ export default function AppointmentScreen() {
               keyboardType="phone-pad"
               style={styles.input}
             />
+
             <View style={styles.modalBtnRow}>
-              {/* Cancel */}
               <TouchableOpacity
                 style={styles.cancelBtn}
                 onPress={() => {
@@ -184,12 +188,11 @@ export default function AppointmentScreen() {
                 <Text style={{ color: "#fff" }}>Cancel</Text>
               </TouchableOpacity>
 
-              {/* Add */}
               <TouchableOpacity
                 style={styles.addBtn}
                 onPress={() => {
                   if (!name || !age || !phone) {
-                    Alert.alert("⚠️ Error", "সব তথ্য দিন");
+                    Alert.alert("Error", "সব তথ্য দিন");
                     return;
                   }
 
@@ -205,10 +208,7 @@ export default function AppointmentScreen() {
                   addPatient(newPatient);
 
                   if (notificationsEnabled) {
-                    Alert.alert(
-                      "New Patient",
-                      `${name} কে যুক্ত করা হয়েছে`
-                    );
+                    Alert.alert("Success", `${name} যুক্ত করা হয়েছে`);
                   }
 
                   setName("");
@@ -217,7 +217,12 @@ export default function AppointmentScreen() {
                   setModalVisible(false);
                 }}
               >
-                <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontWeight: "bold",
+                  }}
+                >
                   Add Patient
                 </Text>
               </TouchableOpacity>
@@ -291,9 +296,8 @@ const styles = StyleSheet.create({
   confirmBtn: {
     backgroundColor: "#10B981",
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: 8,
-    // textAlign: "center",
   },
 
   nowConfirmBtn: {
@@ -318,7 +322,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,.5)",
   },
 
   modalBox: {
@@ -359,15 +363,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#10B981",
     padding: 10,
     borderRadius: 10,
-  },
-
-  moveBtn: {
-    backgroundColor: "#0ea5e9",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginTop: 12,
   },
 });

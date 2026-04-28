@@ -8,7 +8,9 @@ import {
   Image,
   Modal,
   TextInput,
+  Alert,
 } from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { DoctorContext } from "../context/DoctorContext";
@@ -25,11 +27,18 @@ export default function DoctorDashboardScreen() {
   } = useContext(DoctorContext);
 
   const myTodayPatients = todayPatients.filter(
-    (p: any) => p.doctorName === doctor.name
+    (p: any) => p.doctorName === doctor.name,
   );
 
-  const todayPatientsCount =
-doctorQueue.length;
+  const myDoctorQueue = doctorQueue.filter(
+    (p: any) => p.doctorName === doctor.name,
+  );
+
+  const myPendingAppointments = pendingPatients.filter(
+    (p: any) => p.doctorName === doctor.name,
+  );
+
+  const todayPatientsCount = myTodayPatients.length;
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -41,17 +50,16 @@ doctorQueue.length;
 
   const [isActive, setIsActive] = useState(true);
 
-  // remove patient from today's list
-  // const handleDone = (id: number) => {
-  //   markPatientDone(id);
-  // };
+  const handleSeen = (id: number, name: string) => {
+    markPatientDone(id);
+
+    Alert.alert("Completed", `${name} দেখা হয়েছে`);
+  };
 
   return (
     <View style={styles.container}>
-
-      {/* HEADER */}
+      {/* Header */}
       <View style={styles.header}>
-
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => router.replace("/DoctorLogin")}
@@ -60,6 +68,7 @@ doctorQueue.length;
         </TouchableOpacity>
 
         <Text style={styles.title}>ডাক্তার প্যানেল</Text>
+
         <Text style={styles.sub}>স্বাগতম, {doctor.name}</Text>
 
         <TouchableOpacity
@@ -71,37 +80,52 @@ doctorQueue.length;
       </View>
 
       <ScrollView style={{ padding: 15 }}>
-
-        {/* Doctor Card */}
+        {/* Doctor Profile */}
         <View style={styles.doctorcard}>
           <View style={styles.row}>
-
             {doctor.image ? (
-              <Image source={{ uri: doctor.image }} style={styles.profileImg} />
+              <Image
+                source={{
+                  uri: doctor.image,
+                }}
+                style={styles.profileImg}
+              />
             ) : (
               <View style={styles.defaultImg}>
                 <Ionicons name="person" size={30} color="#fff" />
               </View>
             )}
 
-            <View style={{ flex: 1, marginLeft: 10 }}>
+            <View
+              style={{
+                flex: 1,
+                marginLeft: 10,
+              }}
+            >
               <Text style={styles.name}>{doctor.name}</Text>
+
               <Text style={styles.spec}>{doctor.spec}</Text>
+
               <Text style={styles.bmdc}>{doctor.bmdc}</Text>
             </View>
 
             <TouchableOpacity
               style={[
                 styles.statusBtn,
-                { backgroundColor: isActive ? "#10B981" : "#EF4444" },
+                {
+                  backgroundColor: isActive ? "#10B981" : "#EF4444",
+                },
               ]}
               onPress={() => setIsActive(!isActive)}
             >
-              <Text style={{ color: "#fff" }}>
+              <Text
+                style={{
+                  color: "#fff",
+                }}
+              >
                 {isActive ? "Active" : "Inactive"}
               </Text>
             </TouchableOpacity>
-
           </View>
         </View>
 
@@ -122,12 +146,12 @@ doctorQueue.length;
 
         {/* Stats */}
         <View style={styles.statsRow}>
-
           <TouchableOpacity
             style={styles.statBox}
             onPress={() => router.push("/TodayPatient")}
           >
             <Text style={styles.statLabel}>আজকের রোগী</Text>
+
             <Text style={styles.statNumber}>{todayPatientsCount} জন</Text>
           </TouchableOpacity>
 
@@ -136,46 +160,78 @@ doctorQueue.length;
             onPress={() => router.push("/Appointment")}
           >
             <Text style={styles.statLabel}>অ্যাপয়েন্টমেন্ট</Text>
-            <Text style={styles.statNumber}>{pendingPatients.length} জন</Text>
-          </TouchableOpacity>
 
+            <Text style={styles.statNumber}>
+              {myPendingAppointments.length}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Pending Patients */}
+        {/* Queue Status */}
+        {/* <View style={styles.queueSummary}>
+          <Text style={styles.queueTitle}>বর্তমান Queue Status</Text>
+
+          <Text style={styles.queueBig}>
+            {myDoctorQueue.length > 0 ? myDoctorQueue[0].name : "None"}
+          </Text>
+
+          <Text style={styles.queueSub}>
+            বর্তমানে সামনে অপেক্ষমাণ:
+            {myDoctorQueue.length} জন
+          </Text>
+        </View> */}
+
+        {/* Pending Queue */}
         <View style={styles.pendingcard}>
           <View style={styles.row}>
-            <Text style={styles.sectionTitlePending}>⏳পেন্ডিং পেশেন্ট</Text>
+            <Text style={styles.sectionTitlePending}>⏳ পেন্ডিং পেশেন্ট</Text>
           </View>
 
-          {doctorQueue.length === 0 ? (
-            <Text style={{ textAlign: "center", marginTop: 10 }}>
+          {myDoctorQueue.length === 0 ? (
+            <Text
+              style={{
+                textAlign: "center",
+                marginTop: 20,
+              }}
+            >
               আজ কোনো পেশেন্ট নেই
             </Text>
           ) : (
-            doctorQueue.map((p: any, index: number) => (
+            myDoctorQueue.map((p: any, index: number) => (
               <View key={p.id} style={styles.patientCard}>
-                <Text style={styles.serial}>
-                  {index + 1}. {p.name} ({p.age})
-                </Text>
+                <View>
+                  <Text style={styles.serial}>
+                    {index + 1}.{p.name}({p.age})
+                  </Text>
+
+                  {/* <Text style={styles.positionTag}>
+                    Serial:
+                    {index + 1}
+                  </Text> */}
+                </View>
 
                 <TouchableOpacity
                   style={styles.doneBtn}
-                  onPress={() => markPatientDone(p.id)}
+                  onPress={() => handleSeen(p.id, p.name)}
                 >
-                  <Text style={{ color: "#fff" }}>দেখা হয়েছে</Text>
+                  <Text
+                    style={{
+                      color: "#fff",
+                    }}
+                  >
+                    দেখা হয়েছে
+                  </Text>
                 </TouchableOpacity>
               </View>
             ))
           )}
         </View>
-
       </ScrollView>
 
       {/* Modal */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalBox}>
-
             <Text style={styles.modalTitle}>সময়সূচী সম্পাদনা</Text>
 
             <TextInput
@@ -192,18 +248,24 @@ doctorQueue.length;
               <TouchableOpacity
                 style={styles.saveBtn}
                 onPress={() => {
-                  setSchedule({ evening: tempEvening });
+                  setSchedule({
+                    evening: tempEvening,
+                  });
                   setModalVisible(false);
                 }}
               >
-                <Text style={{ color: "#fff" }}>Save</Text>
+                <Text
+                  style={{
+                    color: "#fff",
+                  }}
+                >
+                  Save
+                </Text>
               </TouchableOpacity>
             </View>
-
           </View>
         </View>
       </Modal>
-
     </View>
   );
 }
@@ -224,7 +286,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 15,
     top: 60,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(255,255,255,.2)",
     padding: 8,
     borderRadius: 20,
   },
@@ -239,7 +301,6 @@ const styles = StyleSheet.create({
   sub: {
     color: "#fff",
     marginTop: 5,
-    fontSize: 14,
     textAlign: "center",
   },
 
@@ -301,24 +362,21 @@ const styles = StyleSheet.create({
 
   spec: {
     marginTop: 5,
-    color: "#555",
     backgroundColor: "#f1d5f9",
-    padding: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 10,
-    fontWeight: "800",
-    width: "56%",
-    elevation: 2,
+    alignSelf: "flex-start",
   },
 
   bmdc: {
-    color: "#888",
+    marginTop: 5,
   },
 
   statusBtn: {
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 15,
-    elevation: 4,
   },
 
   sectionTitle: {
@@ -343,7 +401,6 @@ const styles = StyleSheet.create({
 
   scheduleText: {
     textAlign: "center",
-    fontSize: 16,
     color: "#007fff",
   },
 
@@ -355,23 +412,46 @@ const styles = StyleSheet.create({
 
   statBox: {
     width: "48%",
-    backgroundColor: "#f1f5f9",
+    backgroundColor: "#fff",
     padding: 15,
     borderRadius: 12,
     alignItems: "center",
-    elevation: 3,
+    elevation: 4,
   },
 
   statNumber: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#10B981",
   },
 
   statLabel: {
-    marginTop: 5,
-    color: "#4b2b0c",
     fontWeight: "bold",
+  },
+
+  queueSummary: {
+    backgroundColor: "#eefcf6",
+    padding: 20,
+    borderRadius: 20,
+    alignItems: "center",
+    marginBottom: 15,
+    elevation: 4,
+  },
+
+  queueTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+
+  queueBig: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginVertical: 8,
+    color: "#10B981",
+  },
+
+  queueSub: {
+    fontWeight: "600",
   },
 
   patientCard: {
@@ -385,21 +465,26 @@ const styles = StyleSheet.create({
   },
 
   serial: {
+    fontSize: 18,
     fontWeight: "bold",
     color: "#5d8aa8",
-    fontSize: 18,
+  },
+
+  positionTag: {
+    marginTop: 4,
+    fontWeight: "600",
   },
 
   doneBtn: {
     backgroundColor: "#10B981",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 10,
   },
 
   modalContainer: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,.5)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -426,10 +511,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     marginTop: 10,
-    fontSize: 16,
-    color: "#007fff",
     textAlign: "center",
-    elevation: 2,
   },
 
   modalBtnRow: {
@@ -450,6 +532,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#10B981",
     padding: 10,
     borderRadius: 10,
-    elevation: 3,
   },
 });
