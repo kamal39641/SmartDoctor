@@ -15,10 +15,8 @@ import { DoctorContext } from "../context/DoctorContext";
 
 export default function DoctorDetailsScreen() {
   const router = useRouter(); 
-  const isLoggedIn = false; 
   const { doctorName } = useLocalSearchParams();
-  const { addPatient } = useContext(DoctorContext);
-  const { isPatientLoggedIn } = useContext(DoctorContext);
+  const { addPatient, isPatientLoggedIn } = useContext(DoctorContext);
   const { openForm } = useLocalSearchParams();
   useEffect(() => {
     if (openForm === "true") {
@@ -74,7 +72,7 @@ export default function DoctorDetailsScreen() {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            if (!isLoggedIn) {
+            if (!isPatientLoggedIn) {
               router.push({
                 pathname: "/PatientLogin",
                 params: { from: "doctorDetails" },

@@ -109,11 +109,20 @@ export default function PatientDashboardScreen() {
         <View style={styles.appointmentCard}>
           <View style={styles.appointmentHeader}>
             <Text style={styles.sectionTitle}>বর্তমান অ্যাপয়েন্টমেন্ট</Text>
-            {patientPosition > 0 && (
-              <View style={styles.positionBadge}>
-                <Text style={styles.positionText}>#{patientPosition}</Text>
+            <View style={styles.queueCard}>
+              <Text style={styles.queueTitle}>
+                আপনার বর্তমান অবস্থান
+              </Text>
+
+              <Text style={styles.bigSerial}>
+                {patientPosition ?? "-"}
+              </Text>
+
+              <Text>
+              সামনে রোগী বাকি:
+              {patientPosition ? patientPosition-1 : 0}
+              </Text>
               </View>
-            )}
           </View>
 
           <View style={styles.appointmentRow}>
@@ -363,6 +372,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 15,
   },
+
+//   queueCard:{
+// backgroundColor:"white",
+// margin:15,
+// padding:20,
+// borderRadius:20,
+// alignItems:"center",
+// elevation:4
+// },
+
+queueTitle:{
+fontSize:18,
+fontWeight:"bold"
+},
+
+bigSerial:{
+fontSize:42,
+fontWeight:"bold",
+marginVertical:10,
+color:"#10B981"
+},
 
   positionBadge: {
     backgroundColor: "#05a46f",

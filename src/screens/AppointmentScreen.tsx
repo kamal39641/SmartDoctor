@@ -108,7 +108,7 @@ export default function AppointmentScreen() {
                   </Text>
                 </View>
               ))}
-              {myConfirmed.length > 0 && (
+              {/* {myConfirmed.length > 0 && (
                 <TouchableOpacity
                   style={styles.moveBtn}
                   onPress={() => {
@@ -127,9 +127,19 @@ export default function AppointmentScreen() {
                     আজকের রোগী তৈরি করুন
                   </Text>
                 </TouchableOpacity>
-              )}
+              )} */}
             </>
           )}
+
+          <TouchableOpacity
+            style={styles.nowConfirmBtn}
+            onPress={moveConfirmedToToday}
+            >
+            <Text style={{color:"#fff", fontWeight:"bold", textAlign:"center", paddingVertical: 6, fontSize: 16, }}>
+              আজকের রোগীতে পাঠান
+            </Text>
+          </TouchableOpacity>
+
         </View>
       </ScrollView>
 
@@ -283,6 +293,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
+    // textAlign: "center",
+  },
+
+  nowConfirmBtn: {
+    backgroundColor: "#10B981",
+    paddingVertical: 4,
+    borderRadius: 18,
+    borderColor: "#f17d2a",
+    borderWidth: 3,
+    marginTop: 15,
+    marginLeft: "auto",
+    marginRight: "auto",
+    width: "65%",
+    elevation: 5,
   },
 
   empty: {

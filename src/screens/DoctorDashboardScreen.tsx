@@ -19,6 +19,7 @@ export default function DoctorDashboardScreen() {
   const {
     doctor,
     pendingPatients,
+    doctorQueue,
     todayPatients,
     markPatientDone,
   } = useContext(DoctorContext);
@@ -27,7 +28,8 @@ export default function DoctorDashboardScreen() {
     (p: any) => p.doctorName === doctor.name
   );
 
-  const todayCount = myTodayPatients.length;
+  const todayPatientsCount =
+doctorQueue.length;
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -40,9 +42,9 @@ export default function DoctorDashboardScreen() {
   const [isActive, setIsActive] = useState(true);
 
   // remove patient from today's list
-  const handleDone = (id: number) => {
-    markPatientDone(id);
-  };
+  // const handleDone = (id: number) => {
+  //   markPatientDone(id);
+  // };
 
   return (
     <View style={styles.container}>
@@ -126,7 +128,7 @@ export default function DoctorDashboardScreen() {
             onPress={() => router.push("/TodayPatient")}
           >
             <Text style={styles.statLabel}>আজকের রোগী</Text>
-            <Text style={styles.statNumber}>{todayCount} জন</Text>
+            <Text style={styles.statNumber}>{todayPatientsCount} জন</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -145,12 +147,12 @@ export default function DoctorDashboardScreen() {
             <Text style={styles.sectionTitlePending}>⏳পেন্ডিং পেশেন্ট</Text>
           </View>
 
-          {todayCount === 0 ? (
+          {doctorQueue.length === 0 ? (
             <Text style={{ textAlign: "center", marginTop: 10 }}>
               আজ কোনো পেশেন্ট নেই
             </Text>
           ) : (
-            myTodayPatients.map((p: any, index: number) => (
+            doctorQueue.map((p: any, index: number) => (
               <View key={p.id} style={styles.patientCard}>
                 <Text style={styles.serial}>
                   {index + 1}. {p.name} ({p.age})

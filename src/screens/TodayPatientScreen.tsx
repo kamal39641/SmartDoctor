@@ -35,13 +35,13 @@ export default function TodayPatientScreen() {
         <View style={styles.card}>
 
           <Text style={styles.titlecard}>
-            আজকের রোগী: {myTodayPatients.length} জন
+            আজকের রোগী: {todayPatients.length} জন
           </Text>
 
-          {myTodayPatients.length === 0 ? (
+          {todayPatients.length === 0 ? (
             <Text style={styles.empty}>আজ কোনো রোগী নেই</Text>
           ) : (
-            myTodayPatients.map((p: Patient, index: number) => (
+            todayPatients.map((p: Patient, index: number) => (
               <View key={p.id} style={styles.item}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.name}>
