@@ -216,5 +216,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: "100%",
     alignItems: "center",
+    // elevation: 3,
   },
 });

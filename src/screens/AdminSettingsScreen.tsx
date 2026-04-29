@@ -7,6 +7,7 @@ import {
   ScrollView,
   Switch,
   Alert,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -46,6 +47,15 @@ export default function AdminSettingsScreen() {
     }
 
     Alert.alert("সেটিংস আপডেট", message);
+  };
+
+  const handleMessageChange = (text: string) => {
+    setSettings((prev: any) => ({ ...prev, defaultHospitalApprovalMessage: text }));
+  };
+
+  const saveMessage = () => {
+    updateSettings({ defaultHospitalApprovalMessage: settings.defaultHospitalApprovalMessage });
+    Alert.alert("সফল", "ডিফল্ট হাসপাতাল অনুমোদন বার্তা সংরক্ষণ করা হয়েছে");
   };
 
   const SettingItem = ({ icon, title, description, value, onChange }: any) => (
@@ -139,6 +149,52 @@ export default function AdminSettingsScreen() {
               handleSettingChange("maintenanceMode", value)
             }
           />
+        </View>
+
+        {/* Hospital Settings */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>হাসপাতাল সেটিংস</Text>
+
+          <SettingItem
+            icon="home"
+            title="স্বয়ংক্রিয় হাসপাতাল অনুমোদন"
+            description="হাসপাতাল অনুরোধ স্বয়ংক্রিয়ভাবে অনুমোদন করুন"
+            value={settings.hospitalAutoApprove}
+            onChange={(value: boolean) => {
+              handleSettingChange("hospitalAutoApprove", value);
+            }}
+          />
+
+          <SettingItem
+            icon="notifications"
+            title="হাসপাতাল নোটিফিকেশন"
+            description="হাসপাতাল সম্পর্কিত ইভেন্টের জন্য নোটিফিকেশন চালু করুন"
+            value={settings.hospitalNotificationsEnabled}
+            onChange={(value: boolean) => {
+              handleSettingChange("hospitalNotificationsEnabled", value);
+            }}
+          />
+
+          <View style={[styles.settingItem, { alignItems: "flex-start" }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.settingTitle}>ডিফল্ট অনুমোদন বার্তা</Text>
+              <Text style={styles.settingDescription}>
+                হাসপাতালের অনুমোদনের পরে প্রেরণ করার জন্য ডিফল্ট বার্তা সাজান
+              </Text>
+              <TextInput
+                style={[styles.input, { marginTop: 10 }]}
+                value={settings.defaultHospitalApprovalMessage}
+                onChangeText={handleMessageChange}
+                placeholder="আপনার হাসপাতাল অনুমোদিত হয়েছে।"
+                multiline
+              />
+              <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 10 }}>
+                <TouchableOpacity style={styles.confirmBtnSmall} onPress={saveMessage}>
+                  <Text style={styles.confirmTextSmall}>সংরক্ষণ</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         </View>
 
         {/* Danger Zone */}
@@ -435,5 +491,20 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
+  },
+  input: {
+    backgroundColor: "#f3f4f6",
+    borderRadius: 8,
+    padding: 10,
+  },
+  confirmBtnSmall: {
+    backgroundColor: "#0ea5e9",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  confirmTextSmall: {
+    color: "#fff",
+    fontWeight: "700",
   },
 });

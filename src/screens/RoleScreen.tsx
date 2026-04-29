@@ -31,7 +31,7 @@ export default function RoleScreen({ navigation }: any) {
         title="I am an Admin"
         icon="shield-checkmark"
         color="#DC2626"
-        onPress={() => navigation.navigate("AdminDashboard")}
+        onPress={() => navigation.navigate("AdminChoice")}
       />
 
     </View>

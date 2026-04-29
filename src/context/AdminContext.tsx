@@ -223,6 +223,10 @@ export const AdminProvider = ({ children }: any) => {
     emailAlertsEnabled: true,
     autoApprovalEnabled: false,
     maintenanceMode: false,
+    // Hospital-specific settings
+    hospitalAutoApprove: false,
+    hospitalNotificationsEnabled: true,
+    defaultHospitalApprovalMessage: "আপনার হাসপাতাল অনুমোদিত হয়েছে।",
   });
 
   // ==================== DOCTOR APPROVAL ====================
@@ -307,6 +311,76 @@ export const AdminProvider = ({ children }: any) => {
     setAdminSettings((prev) => ({ ...prev, ...newSettings }));
   };
 
+  // ==================== ADMIN AUTH ====================
+  // Simple in-memory admin store. In real app, replace with secure backend.
+  const [admins, setAdmins] = useState<any[]>([
+    // pre-seeded super-admin (example)
+    { id: 1, name: "Primary Admin", email: "admin@system.com", password: "admin123", type: "system" },
+  ]);
+
+  // current logged-in admin
+  const [currentAdmin, setCurrentAdmin] = useState<any>(null);
+
+  // secret keys required to register specific admin types (must be shared securely)
+  const adminSecrets: any = {
+    hospital: "HOSP_SECRET_2024",
+    system: "SYS_SECRET_2024",
+  };
+
+  const registerAdmin = (type: string, name: string, email: string, password: string, secretKey: string) => {
+    // validate secret
+    if (adminSecrets[type] !== secretKey) {
+      return { success: false, message: "Invalid admin secret" };
+    }
+
+    // prevent duplicate email
+    if (admins.find((a) => a.email === email)) {
+      return { success: false, message: "Email already registered" };
+    }
+
+    const newAdmin = {
+      id: admins.length + 1,
+      name,
+      email,
+      password,
+      type,
+    };
+
+    setAdmins((prev) => [...prev, newAdmin]);
+    setCurrentAdmin(newAdmin);
+    return { success: true, admin: newAdmin };
+  };
+
+  const loginAdmin = (email: string, password: string) => {
+    const found = admins.find((a) => a.email === email && a.password === password);
+    if (!found) return { success: false, message: "Invalid credentials" };
+    setCurrentAdmin(found);
+    return { success: true, admin: found };
+  };
+
+  // Demo login: allow bypass for demo purposes (creates or reuses a demo admin)
+  const demoLogin = (type: string) => {
+    // try to find existing admin of this type
+    let found = admins.find((a) => a.type === type);
+    if (!found) {
+      // create a demo admin for this type
+      found = {
+        id: admins.length + 1,
+        name: `${type.charAt(0).toUpperCase() + type.slice(1)} Demo Admin`,
+        email: `${type}.demo@local`,
+        password: "demo",
+        type,
+      };
+      setAdmins((prev) => [...prev, found]);
+    }
+    setCurrentAdmin(found);
+    return { success: true, admin: found };
+  };
+
+  const logoutAdmin = () => {
+    setCurrentAdmin(null);
+  };
+
   return (
     <AdminContext.Provider
       value={{
@@ -339,6 +413,14 @@ export const AdminProvider = ({ children }: any) => {
         // Settings
         adminSettings,
         updateSettings,
+        // Admin Auth
+        admins,
+        currentAdmin,
+        registerAdmin,
+        loginAdmin,
+        demoLogin,
+        logoutAdmin,
+        adminSecrets,
       }}
     >
       {children}

@@ -9,7 +9,15 @@ import DoctorRegisterScreen from "../src/screens/DoctorRegisterScreen";
 import PatientRegisterScreen from "../src/screens/PatientRegisterScreen";
 import PatientHomeScreen from "../src/screens/PatientHomeScreen";
 import DoctorSearchScreen from "../src/screens/DoctorSearchScreen";
-import AdminDashboardScreen from "../src/screens/AdminDashboardScreen";
+import AdminLoginScreen from "../src/screens/AdminLoginScreen";
+import AdminChoiceScreen from "../src/screens/AdminChoiceScreen";
+import AdminHospitalAuthScreen from "../src/screens/AdminHospitalAuthScreen";
+import AdminSystemAuthScreen from "../src/screens/AdminSystemAuthScreen";
+import AdminControllerHome from "../src/screens/AdminControllerHome";
+import AdminHospitalApprovalScreen from "../src/screens/AdminHospitalApprovalScreen";
+import AdminDoctorApprovalScreen from "../src/screens/AdminDoctorApprovalScreen";
+import AdminBlockedUsersScreen from "../src/screens/AdminBlockedUsersScreen";
+import AdminSettingsScreen from "../src/screens/AdminSettingsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,7 +32,15 @@ export default function App() {
         <Stack.Screen name="PatientRegister" component={PatientRegisterScreen} />
         <Stack.Screen name="PatientHome" component={PatientHomeScreen} />
         <Stack.Screen name="DoctorSearch" component={DoctorSearchScreen} />
-        <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+        <Stack.Screen name="AdminLogin" component={AdminLoginScreen} />
+        <Stack.Screen name="AdminChoice" component={AdminChoiceScreen} />
+        <Stack.Screen name="AdminHospitalAuth" component={AdminHospitalAuthScreen} />
+        <Stack.Screen name="AdminSystemAuth" component={AdminSystemAuthScreen} />
+        <Stack.Screen name="AdminControllerHome" component={AdminControllerHome} />
+        <Stack.Screen name="AdminHospitalApproval" component={AdminHospitalApprovalScreen} />
+        <Stack.Screen name="AdminDoctorApproval" component={AdminDoctorApprovalScreen} />
+        <Stack.Screen name="AdminBlockedUsers" component={AdminBlockedUsersScreen} />
+        <Stack.Screen name="AdminSettings" component={AdminSettingsScreen} />
       </Stack.Navigator>
   );
 }

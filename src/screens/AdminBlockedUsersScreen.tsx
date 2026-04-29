@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Alert,
   FlatList,
+  Modal,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -13,7 +15,11 @@ import { AdminContext } from "../context/AdminContext";
 
 export default function AdminBlockedUsersScreen() {
   const router = useRouter();
-  const { blockedUsers, unblockUser } = useContext(AdminContext);
+  const { blockedUsers, unblockUser, blockUser } = useContext(AdminContext);
+  const [blockModalVisible, setBlockModalVisible] = useState(false);
+  const [blockName, setBlockName] = useState("");
+  const [blockEmail, setBlockEmail] = useState("");
+  const [blockReason, setBlockReason] = useState("");
 
   const handleUnblock = (userId: number) => {
     Alert.alert(
@@ -141,6 +147,9 @@ export default function AdminBlockedUsersScreen() {
           <Text style={styles.headerTitle}>ব্লক করা ব্যবহারকারী</Text>
           <Text style={styles.headerSub}>মোট: {blockedUsers.length}</Text>
         </View>
+        <TouchableOpacity style={styles.blockButton} onPress={() => setBlockModalVisible(true)}>
+          <Ionicons name="person-remove" size={20} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       {blockedUsers.length > 0 ? (
@@ -158,6 +167,47 @@ export default function AdminBlockedUsersScreen() {
           <Text style={styles.emptySubText}>সব ব্যবহারকারী সক্রিয়</Text>
         </View>
       )}
+
+      <Modal visible={blockModalVisible} animationType="slide" transparent>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>ডাক্তার ব্লক করুন</Text>
+
+            <Text style={styles.inputLabel}>ডাক্তারের নাম</Text>
+            <TextInput style={styles.input} value={blockName} onChangeText={setBlockName} placeholder="ডাক্তারের নাম" />
+
+            <Text style={styles.inputLabel}>ইমেইল</Text>
+            <TextInput style={styles.input} value={blockEmail} onChangeText={setBlockEmail} placeholder="doctor@email.com" keyboardType="email-address" />
+
+            <Text style={styles.inputLabel}>ব্লক করার কারণ</Text>
+            <TextInput style={[styles.input, { height: 80 }]} value={blockReason} onChangeText={setBlockReason} placeholder="কারণ লিখুন" multiline />
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setBlockModalVisible(false)}>
+                <Text style={styles.cancelText}>বাতিল</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmBtn}
+                onPress={() => {
+                  if (!blockName || !blockEmail || !blockReason) {
+                    Alert.alert("ত্রুটি", "সব ফিল্ড পূরণ করুন");
+                    return;
+                  }
+                  // use email as userId
+                  blockUser(blockEmail, blockName, blockEmail, "doctor", blockReason);
+                  Alert.alert("সফল", "ডাক্তার ব্লক করা হয়েছে");
+                  setBlockModalVisible(false);
+                  setBlockName("");
+                  setBlockEmail("");
+                  setBlockReason("");
+                }}
+              >
+                <Text style={styles.confirmText}>ব্লক করুন</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -318,5 +368,65 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#999",
     marginTop: 5,
+  },
+  blockButton: {
+    position: "absolute",
+    right: 15,
+    top: 50,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    padding: 8,
+    borderRadius: 18,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContainer: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: "#333",
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  input: {
+    backgroundColor: "#f3f4f6",
+    borderRadius: 8,
+    padding: 10,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 12,
+  },
+  cancelBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  cancelText: {
+    color: "#666",
+  },
+  confirmBtn: {
+    backgroundColor: "#DC2626",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  confirmText: {
+    color: "#fff",
+    fontWeight: "700",
   },
 });

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   Alert,
   FlatList,
+  Modal,
+  Switch,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -13,7 +16,19 @@ import { AdminContext } from "../context/AdminContext";
 
 export default function AdminHospitalApprovalScreen() {
   const router = useRouter();
-  const { pendingHospitals, approveHospital, rejectHospital } = useContext(AdminContext);
+  const { pendingHospitals, approveHospital, rejectHospital, adminSettings, updateSettings } = useContext(AdminContext);
+  const [settingsVisible, setSettingsVisible] = useState(false);
+  const [localSettings, setLocalSettings] = useState({
+    hospitalAutoApprove: adminSettings?.hospitalAutoApprove ?? false,
+    hospitalNotificationsEnabled: adminSettings?.hospitalNotificationsEnabled ?? true,
+    defaultHospitalApprovalMessage: adminSettings?.defaultHospitalApprovalMessage ?? "আপনার হাসপাতাল অনুমোদিত হয়েছে।",
+  });
+
+  const toggleLocal = (key: string, value: any) => {
+    const updated = { ...localSettings, [key]: value };
+    setLocalSettings(updated);
+    updateSettings({ [key]: value });
+  };
 
   const handleApprove = (hospitalId: number) => {
     Alert.alert(
@@ -134,6 +149,10 @@ export default function AdminHospitalApprovalScreen() {
           <Text style={styles.headerTitle}>হাসপাতাল অনুমোদন</Text>
           <Text style={styles.headerSub}>অপেক্ষমাণ: {pendingHospitals.length}</Text>
         </View>
+
+        <TouchableOpacity style={styles.settingsButton} onPress={() => setSettingsVisible(true)}>
+          <Ionicons name="settings" size={22} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       {pendingHospitals.length > 0 ? (
@@ -151,9 +170,55 @@ export default function AdminHospitalApprovalScreen() {
           <Text style={styles.emptySubText}>নতুন অনুরোধের জন্য অপেক্ষা করছি</Text>
         </View>
       )}
+
+      <Modal visible={settingsVisible} animationType="slide" transparent>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>হাসপাতাল সেটিংস</Text>
+
+            <View style={styles.modalRow}>
+              <Text style={styles.modalLabel}>স্বয়ংক্রিয় অনুমোদন (যাচাইকৃত হলে)</Text>
+              <Switch
+                value={localSettings.hospitalAutoApprove}
+                onValueChange={(v) => toggleLocal("hospitalAutoApprove", v)}
+                trackColor={{ false: "#ccc", true: "#10b981" }}
+                thumbColor={localSettings.hospitalAutoApprove ? "#fff" : "#f3f4f6"}
+              />
+            </View>
+
+            <View style={styles.modalRow}>
+              <Text style={styles.modalLabel}>নতুন অনুরোধে নোটিফাই করুন</Text>
+              <Switch
+                value={localSettings.hospitalNotificationsEnabled}
+                onValueChange={(v) => toggleLocal("hospitalNotificationsEnabled", v)}
+                trackColor={{ false: "#ccc", true: "#0ea5e9" }}
+                thumbColor={localSettings.hospitalNotificationsEnabled ? "#fff" : "#f3f4f6"}
+              />
+            </View>
+
+            <Text style={[styles.modalLabel, { marginTop: 12 }]}>ডিফল্ট অনুমোদন বার্তা</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={localSettings.defaultHospitalApprovalMessage}
+              onChangeText={(t) => toggleLocal("defaultHospitalApprovalMessage", t)}
+              multiline
+            />
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.modalClose} onPress={() => setSettingsVisible(false)}>
+                <Text style={styles.modalCloseText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
+
+  // Settings Modal
+  // Note: Modal placed after return logically but will render from root of component
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -335,5 +400,64 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#999",
     marginTop: 5,
+  },
+  settingsButton: {
+    position: "absolute",
+    right: 15,
+    top: 50,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    padding: 8,
+    borderRadius: 18,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContainer: {
+    width: "100%",
+    maxHeight: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
+  modalRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  modalLabel: {
+    fontSize: 14,
+    color: "#333",
+    flex: 1,
+    marginRight: 12,
+  },
+  modalInput: {
+    backgroundColor: "#f3f4f6",
+    borderRadius: 8,
+    padding: 10,
+    minHeight: 60,
+    textAlignVertical: "top",
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 12,
+  },
+  modalClose: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  modalCloseText: {
+    color: "#0ea5e9",
+    fontWeight: "600",
   },
 });

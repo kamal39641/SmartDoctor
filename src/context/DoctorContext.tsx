@@ -18,7 +18,6 @@ export const DoctorProvider = ({ children }: any) => {
   // =========================
   // Doctor Info
   // =========================
-
   const [doctor, setDoctor] = useState({
     name: "ডা. আহমেদ রহমান",
     spec: "কার্ডিওলজিস্ট",
@@ -30,28 +29,17 @@ export const DoctorProvider = ({ children }: any) => {
   // =========================
   // Settings
   // =========================
-
-  const [notificationsEnabled, setNotificationsEnabled] =
-    useState(true);
-
-  const [isPatientLoggedIn, setIsPatientLoggedIn] =
-    useState(false);
-
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(false);
 
   // =========================
-  // LOGGED BOOKED PATIENT
-  // (for PatientDashboard live queue)
+  // Logged patient (PatientDashboard tracking)
   // =========================
-
-  const [loggedPatient, setLoggedPatient] =
-    useState<Patient | null>(null);
-
-
+  const [loggedPatient, setLoggedPatient] = useState<Patient | null>(null);
 
   // =========================
   // Demo Data
   // =========================
-
   const demoPending: Patient[] = [
     {
       id: 1,
@@ -62,7 +50,6 @@ export const DoctorProvider = ({ children }: any) => {
       phone: "01710000001",
       status: "pending",
     },
-
     {
       id: 2,
       name: "রফিকুল ইসলাম",
@@ -73,8 +60,6 @@ export const DoctorProvider = ({ children }: any) => {
       status: "pending",
     },
   ];
-
-
 
   const demoConfirmed: Patient[] = [
     {
@@ -88,8 +73,6 @@ export const DoctorProvider = ({ children }: any) => {
     },
   ];
 
-
-
   const demoToday: Patient[] = [
     {
       id: 21,
@@ -102,256 +85,148 @@ export const DoctorProvider = ({ children }: any) => {
     },
   ];
 
-
   // =========================
   // STATES
   // =========================
-
-  const [pendingPatients,setPendingPatients] =
-    useState<Patient[]>(demoPending);
-
-  const [confirmedPatients,setConfirmedPatients] =
-    useState<Patient[]>(demoConfirmed);
-
-  const [todayPatients,setTodayPatients] =
-    useState<Patient[]>(demoToday);
-
-
-  // LIVE QUEUE
-  const [doctorQueue,setDoctorQueue] =
-    useState<Patient[]>(demoToday);
-
-
+  const [pendingPatients, setPendingPatients] = useState<Patient[]>(demoPending);
+  const [confirmedPatients, setConfirmedPatients] = useState<Patient[]>(demoConfirmed);
+  const [todayPatients, setTodayPatients] = useState<Patient[]>(demoToday);
+  const [doctorQueue, setDoctorQueue] = useState<Patient[]>(demoToday);
 
   // =========================
-  // ADD PATIENT BOOKING
+  // 🔥 LIVE POSITION MAP (NEW FIX)
   // =========================
+  const [patientPositions, setPatientPositions] =
+    useState<{ [key: number]: number }>({});
 
-  const addPatient = (
-    patient: Patient
-  ) => {
+  // =========================
+  // ADD PATIENT
+  // =========================
+  const addPatient = (patient: Patient) => {
 
     setPendingPatients(prev => {
+      const exists = prev.find(p => p.id === patient.id);
+      if (exists) return prev;
 
-      const exists =
-        prev.find(
-          p=>p.id===patient.id
-        );
-
-      if(exists) return prev;
-
-      return [
-        ...prev,
-        {
-          ...patient,
-          status:"pending"
-        }
-      ];
-
+      return [...prev, { ...patient, status: "pending" }];
     });
 
-
-    // save booked patient
-    // PatientDashboard live tracking
     setLoggedPatient(patient);
 
+    // 🔥 initial position assign
+    setPatientPositions(prev => ({
+      ...prev,
+      [patient.id]: Object.keys(prev).length + 1,
+    }));
 
-    if(notificationsEnabled){
+    if (notificationsEnabled) {
       Alert.alert(
         "Appointment Sent",
         `${patient.name} appointment request submitted`
       );
     }
-
   };
 
-
-
   // =========================
-  // CONFIRM APPOINTMENT
+  // CONFIRM PATIENT
   // =========================
-
-  const confirmPatient = (
-    patient:Patient
-  ) => {
+  const confirmPatient = (patient: Patient) => {
 
     setPendingPatients(prev =>
-      prev.filter(
-        p=>p.id!==patient.id
-      )
+      prev.filter(p => p.id !== patient.id)
     );
 
-
-    setConfirmedPatients(prev=>{
-
-      const exists=
-        prev.find(
-          p=>p.id===patient.id
-        );
-
-      if(exists) return prev;
-
-      return[
-        ...prev,
-        {
-          ...patient,
-          status:"confirmed"
-        }
-      ];
-
-    });
-
-
-    if(notificationsEnabled){
-      Alert.alert(
-        "Appointment Confirmed",
-        `${patient.name} confirmed`
-      );
-    }
-
+    setConfirmedPatients(prev => [
+      ...prev,
+      { ...patient, status: "confirmed" },
+    ]);
   };
 
-
-
   // =========================
-  // CONFIRMED -> TODAY QUEUE
+  // MOVE TO TODAY + QUEUE
   // =========================
-
   const moveConfirmedToToday = () => {
 
-    setTodayPatients(prev=>{
+    setTodayPatients(prev => {
 
-      const existing=
-        new Set(
-          prev.map(
-            p=>p.id
-          )
-        );
+      const existing = new Set(prev.map(p => p.id));
 
-      const newPatients=
-        confirmedPatients
-          .filter(
-            p=>!existing.has(p.id)
-          )
-          .map(
-            p=>({
-              ...p,
-              status:"today"
-            })
-          );
+      const newPatients = confirmedPatients
+        .filter(p => !existing.has(p.id))
+        .map(p => ({ ...p, status: "today" }));
 
-      return[
-        ...prev,
-        ...newPatients
-      ];
-
+      return [...prev, ...newPatients];
     });
 
+    setDoctorQueue(prev => {
 
+      const existing = new Set(prev.map(p => p.id));
 
-    setDoctorQueue(prev=>{
+      const newQueue = confirmedPatients.filter(p => !existing.has(p.id));
 
-      const existing=
-        new Set(
-          prev.map(
-            p=>p.id
-          )
-        );
+      const updated = [...prev, ...newQueue];
 
-      const newQueue=
-        confirmedPatients.filter(
-          p=>!existing.has(p.id)
-        );
+      // 🔥 UPDATE POSITION MAP
+      const newPositions: any = {};
+      updated.forEach((p, index) => {
+        newPositions[p.id] = index + 1;
+      });
 
-      return[
-        ...prev,
-        ...newQueue
-      ];
+      setPatientPositions(newPositions);
 
+      return updated;
     });
-
 
     setConfirmedPatients([]);
-
   };
 
-
-
   // =========================
-  // PATIENT SEEN
-  // Queue shifts automatically
+  // PATIENT DONE
   // =========================
+  const markPatientDone = (patientId: number) => {
 
-  const markPatientDone = (
-    patientId:number
-  ) => {
+    setDoctorQueue(prev => {
 
-    setDoctorQueue(prev=>
-      prev.filter(
-        p=>p.id!==patientId
-      )
-    );
+      const updated = prev.filter(p => p.id !== patientId);
 
+      // 🔥 REBUILD POSITION MAP
+      const newPositions: any = {};
+      updated.forEach((p, index) => {
+        newPositions[p.id] = index + 1;
+      });
+
+      setPatientPositions(newPositions);
+
+      return updated;
+    });
   };
-
-
 
   // =========================
   // CLEAR TODAY
   // =========================
-
   const clearTodayPatients = () => {
     setTodayPatients([]);
   };
 
-
-
   // =========================
-  // LIVE POSITION
+  // 🔥 LIVE POSITION (FIXED)
   // =========================
-
-  const getPatientPosition = (
-    patientId:number
-  ) => {
-
-    const index=
-      doctorQueue.findIndex(
-        p=>p.id===patientId
-      );
-
-    if(index===-1){
-      return null;
-    }
-
-    return index+1;
-
+  const getPatientPosition = (patientId: number) => {
+    return patientPositions[patientId] ?? null;
   };
 
-
-
-  // patients ahead
-  const patientsAhead = (
-    patientId:number
-  ) => {
-
-    const pos=
-      getPatientPosition(
-        patientId
-      );
-
-    if(pos===null){
-      return 0;
-    }
-
-    return pos-1;
+  const patientsAhead = (patientId: number) => {
+    const pos = getPatientPosition(patientId);
+    if (!pos) return 0;
+    return pos - 1;
   };
 
-
-
-  return(
+  // =========================
+  // PROVIDER
+  // =========================
+  return (
     <DoctorContext.Provider
       value={{
-
         doctor,
         setDoctor,
 
@@ -361,7 +236,6 @@ export const DoctorProvider = ({ children }: any) => {
         isPatientLoggedIn,
         setIsPatientLoggedIn,
 
-        // NEW
         loggedPatient,
         setLoggedPatient,
 
@@ -383,13 +257,12 @@ export const DoctorProvider = ({ children }: any) => {
         markPatientDone,
         clearTodayPatients,
 
+        // 🔥 NEW LIVE SYSTEM
         getPatientPosition,
         patientsAhead,
-
       }}
     >
       {children}
     </DoctorContext.Provider>
   );
-
 };
